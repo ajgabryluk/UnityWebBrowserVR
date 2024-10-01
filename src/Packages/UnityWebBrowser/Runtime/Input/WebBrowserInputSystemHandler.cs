@@ -10,7 +10,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
+using UnityEngine.XR;
+using UnityEngine.XR.Interaction.Toolkit.Interactors;
 using VoltstroStudios.UnityWebBrowser.Shared;
+
 
 namespace VoltstroStudios.UnityWebBrowser.Input
 {
@@ -38,17 +41,33 @@ namespace VoltstroStudios.UnityWebBrowser.Input
             //Mouse scroll wheel in the new input system is fucked, its value is either 120 or -120,
             //no in-between or -1.0 to 1.0 like the old input system. Why Unity.
             //While there are forum post talking about this, nothing is from Unity themselves about the issue.
-            float scroll = scrollInput.ReadValue<Vector2>().y;
-            scroll = Mathf.Clamp(scroll, -scrollValue, scrollValue);
+            UnityEngine.XR.InputDevice rightHandDevice = UnityEngine.XR.InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
+            Vector2 joystickValue;
+            float yValue = 0;
+            if (rightHandDevice.TryGetFeatureValue(UnityEngine.XR.CommonUsages.primary2DAxis, out joystickValue))
+            {
+                // Extract the Y value from the Vector2 (up/down movement)
+                yValue = joystickValue.y;
+                Debug.Log(yValue);
+            }
+            float scroll = Mathf.Clamp(yValue > 0.4 ? yValue * 0.25f : yValue, -scrollValue, scrollValue);
 
             return scroll;
         }
 
         public override Vector2 GetCursorPos()
         {
-            return pointPosition.ReadValue<Vector2>();
+            XRRayInteractor ray = GameObject.Find("Right Controller").GetComponent<XRRayInteractor>();
+            if (ray.TryGetCurrent3DRaycastHit(out RaycastHit hitInfo))
+            {
+                // Get the world position of the hit UI element
+                Vector3 worldPosition = hitInfo.point;
+                // Convert the world position to screen space
+                Vector3 screenPosition = Camera.main.WorldToScreenPoint(worldPosition);
+                return screenPosition;
+            }
+            return Vector2.zero;
         }
-
         public override WindowsKey[] GetDownKeys()
         {
             keysDown.Clear();

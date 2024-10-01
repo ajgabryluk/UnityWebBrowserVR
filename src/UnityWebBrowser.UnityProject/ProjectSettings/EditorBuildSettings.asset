@@ -8,4 +8,6 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/UWB.unity
     guid: 2cda990e2423bbf4892e6590ba056729
-  m_configObjects: {}
+  m_configObjects:
+    com.unity.xr.management.loader_settings: {fileID: 11400000, guid: 56c7f2e0709a1874baef16538649b387, type: 2}
+    com.unity.xr.openxr.settings4: {fileID: 11400000, guid: 8e434adf63f6a7e44ac797b67d05bb61, type: 2}
